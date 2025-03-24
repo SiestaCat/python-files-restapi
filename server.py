@@ -71,6 +71,26 @@ async def upload_files(
 async def get_stats():
     return FileResponse("stats.html", media_type="text/html")
 
+@app.get("/getstats")
+async def get_file_stats(api_key: None = Depends(verify_api_key)):
+    total_folders = 0
+    total_files = 0
+    total_size = 0
+
+    for root, dirs, files in os.walk(FILES_DIR):
+        total_folders += len(dirs)
+        total_files += len(files)
+        for file in files:
+            file_path = os.path.join(root, file)
+            if os.path.isfile(file_path):
+                total_size += os.path.getsize(file_path)
+
+    total_size_gb = total_size / (1024**3)
+    # Format size with two decimals and replace decimal point with a comma
+    size_str = f"{total_size_gb:.2f}".replace('.', ',') + " GB"
+    
+    return {"folders": total_folders, "files": total_files, "size": size_str}
+
 if __name__ == "__main__":
     import uvicorn
     # Run the app with plain HTTP on the port specified in the environment

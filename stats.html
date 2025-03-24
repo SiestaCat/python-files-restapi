@@ -70,13 +70,18 @@
       var protocol = document.getElementById("protocol").value;
       var hostname = document.getElementById("hostname").value;
       var port = document.getElementById("port").value;
-      var apikey = document.getElementById("apikey").value; // actualmente no se utiliza en la petición
+      var apikey = document.getElementById("apikey").value;
       
       // Construye la URL a la que se llamará (sufijo /stats)
-      var url = protocol + "://" + hostname + ":" + port + "/stats";
+      var url = protocol + "://" + hostname + ":" + port + "/getstats";
 
-      // Llamada a la API con fetch
-      fetch(url)
+      // Llamada a la API con fetch, enviando la cabecera X-API-Key
+      fetch(url, {
+        method: "GET",
+        headers: {
+          "X-API-Key": apikey
+        }
+      })
       .then(response => response.json())
       .then(data => {
         // Actualiza los elementos h2 con los datos obtenidos
