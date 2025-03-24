@@ -18,7 +18,7 @@ except ImportError:
 
 # Retrieve the API key and port from environment variables
 API_KEY = os.getenv("API_KEY", "default_api_key")
-PORT = int(os.getenv("HTTP_SERVER_PORT", "8000"))
+PORT = int(os.getenv("HTTP_SERVER_PORT", "8080"))
 
 # Define the base directory to store files
 FILES_DIR = "files"
