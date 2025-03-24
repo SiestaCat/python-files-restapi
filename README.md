@@ -136,7 +136,7 @@ docker build --progress=plain -f Dockerfile-oneclick -t python-files-api .
 ### Run the Docker Container
 
 ```bash
-docker run --rm -it -p 8080:8080 --env API_KEY=your_api_key_here python-files-api
+docker run --rm -it -p 8080:8080 --env API_KEY=changeme python-files-api
 ```
 
 *Remember to update the API key and port as needed.*
