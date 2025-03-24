@@ -6,6 +6,7 @@ from typing import List
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Depends
 from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 # Attempt to load environment variables from a .env file if present
@@ -24,6 +25,8 @@ FILES_DIR = "files"
 
 app = FastAPI()
 
+templates = Jinja2Templates(directory="templates")
+
 # Create the "files" directory if it doesn't exist
 if not os.path.exists(FILES_DIR):
     os.makedirs(FILES_DIR)
@@ -40,11 +43,9 @@ async def download_file(file_path: str, request: Request, api_key: None = Depend
     full_path = os.path.join(FILES_DIR, file_path)
     if not os.path.isfile(full_path):
         raise HTTPException(status_code=404, detail="File not found")
-    # Auto-detect mime type; default to octet-stream if undetermined
     mime_type, _ = mimetypes.guess_type(full_path)
     if mime_type is None:
         mime_type = "application/octet-stream"
-    # FileResponse streams the file without loading the entire file into memory
     return FileResponse(full_path, media_type=mime_type, filename=os.path.basename(full_path))
 
 # Upload endpoint: allow single or multiple file uploads
@@ -54,22 +55,20 @@ async def upload_files(
     request: Request = None,
     api_key: None = Depends(verify_api_key)
 ):
-    # Create a unique UUID folder for this upload session
     unique_folder = os.path.join(FILES_DIR, str(uuid.uuid4()))
     os.makedirs(unique_folder, exist_ok=True)
     saved_files = []
     for file in files:
         file_path = os.path.join(unique_folder, file.filename)
-        # Stream the file content to disk to support large files without high memory usage
         with open(file_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
         saved_files.append(file.filename)
     return {"folder": os.path.basename(unique_folder), "files": saved_files}
 
-# Stats endpoint: returns the "stats.html" file as an HTML response
+# Template endpoint: returns the stats page with default port passed in
 @app.get("/stats", response_class=HTMLResponse)
-async def get_stats():
-    return FileResponse("stats.html", media_type="text/html")
+async def stats_page(request: Request):
+    return templates.TemplateResponse("stats.html", {"request": request, "port": PORT})
 
 @app.get("/getstats")
 async def get_file_stats(api_key: None = Depends(verify_api_key)):
@@ -86,12 +85,10 @@ async def get_file_stats(api_key: None = Depends(verify_api_key)):
                 total_size += os.path.getsize(file_path)
 
     total_size_gb = total_size / (1024**3)
-    # Format size with two decimals and replace decimal point with a comma
     size_str = f"{total_size_gb:.2f}".replace('.', ',') + " GB"
     
     return {"folders": total_folders, "files": total_files, "size": size_str}
 
 if __name__ == "__main__":
     import uvicorn
-    # Run the app with plain HTTP on the port specified in the environment
     uvicorn.run(app, host="0.0.0.0", port=PORT)

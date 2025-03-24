@@ -39,7 +39,7 @@
       </div>
       <!-- Campo de texto para puerto -->
       <div class="col-md-2">
-        <input type="text" id="port" class="form-control" placeholder="Puerto" value="8080">
+        <input type="text" id="port" class="form-control" placeholder="Puerto" value="{{ port }}">
       </div>
       <!-- Campo de contraseña para API key -->
       <div class="col-md-3">
@@ -84,13 +84,18 @@
       })
       .then(response => response.json())
       .then(data => {
+        if(data.hasOwnProperty('detail'))
+        {
+          alert(data.detail);
+          return;
+        }
         // Actualiza los elementos h2 con los datos obtenidos
         document.getElementById("folders").textContent = "Folders: " + data.folders;
         document.getElementById("files").textContent = "Files: " + data.files;
         document.getElementById("size").textContent = "Total size: " + data.size;
       })
       .catch(error => {
-        console.error("Error fetching data:", error);
+        alert("Error fetching data:" + error.toString());
       });
     });
   </script>
