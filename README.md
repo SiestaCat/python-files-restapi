@@ -122,16 +122,24 @@ curl.exe -X GET http://localhost:8080/download/generated_upload_folder/example.t
 ### Build the Docker Image
 
 ```bash
-docker build -t python-files-api .
+docker build --progress=plain -t python-files-api .
+```
+
+### One-Click Deployment with Dockerfile-oneclick
+
+If you prefer a one-click setup using the provided Dockerfile-oneclick, run:
+
+```bash
+docker build --progress=plain -f Dockerfile-oneclick -t python-files-api .
 ```
 
 ### Run the Docker Container
 
 ```bash
-docker run -d -p 8000:8000 --env API_KEY=your_api_key_here python-files-api
+docker run --rm -it -p 8080:8080 --env API_KEY=your_api_key_here python-files-api
 ```
 
-*Note: Adjust the environment variables as needed.*
+*Remember to update the API key and port as needed.*
 
 ## Additional Information
 
