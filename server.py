@@ -68,13 +68,30 @@ async def upload_files(
     os.makedirs(unique_folder, exist_ok=True)
     logger.info(f"Created unique upload folder: {unique_folder}")
     saved_files = []
+    total_upload_size = 0
     for file in files:
         file_path = os.path.join(unique_folder, file.filename)
         with open(file_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
-        saved_files.append(file.filename)
-        logger.info(f"Uploaded file: {file.filename} to {unique_folder}")
-    return {"folder": os.path.basename(unique_folder), "files": saved_files}
+        file_size = os.path.getsize(file_path)
+        total_upload_size += file_size
+        saved_files.append({
+            "filename": file.filename,
+            "size_bytes": file_size,
+            "size_formatted": format_size(file_size)
+        })
+        logger.info(f"Uploaded file: {file.filename} ({format_size(file_size)}) to {unique_folder}")
+    
+    # Log the formatted total upload size
+    formatted_total_size = format_size(total_upload_size)
+    logger.info(f"Total uploaded size: {formatted_total_size} ({total_upload_size} bytes)")
+    
+    return {
+        "folder": os.path.basename(unique_folder),
+        "files": saved_files,
+        "total_upload_size_bytes": total_upload_size,
+        "total_upload_size_formatted": formatted_total_size
+    }
 
 # Template endpoint merged with getstats functionality:
 @app.get("/stats", response_class=HTMLResponse)
@@ -91,18 +108,6 @@ async def stats_page(request: Request):
             if os.path.isfile(file_path):
                 total_size += os.path.getsize(file_path)
 
-    def format_size(size_bytes):
-        # Returns size formatted in B, KB, MB, GB, TB, or PT
-        if size_bytes == 0:
-            return "0 B"
-        units = ["B", "KB", "MB", "GB", "TB", "PT"]
-        size = float(size_bytes)
-        for unit in units:
-            if size < 1024:
-                return f"{size:.2f} {unit}"
-            size /= 1024
-        return f"{size:.2f} PT"
-
     size_str = format_size(total_size)
     logger.info(f"Stats calculated: {total_folders} folders, {total_files} files, total size {size_str}")
     return templates.TemplateResponse("stats.html", {
@@ -111,6 +116,18 @@ async def stats_page(request: Request):
         "files": total_files,
         "size": size_str
     })
+
+def format_size(size_bytes):
+    # Returns size formatted in B, KB, MB, GB, TB, or PT
+    if size_bytes == 0:
+        return "0 B"
+    units = ["B", "KB", "MB", "GB", "TB", "PT"]
+    size = float(size_bytes)
+    for unit in units:
+        if size < 1024:
+            return f"{size:.2f} {unit}"
+        size /= 1024
+    return f"{size:.2f} PT"
 
 if __name__ == "__main__":
     import uvicorn
