@@ -20,7 +20,7 @@ A simple FastAPI service for uploading and downloading files with API key protec
 
 1. **Clone the repository:**
    ```bash
-   git clone https://your-repository-url.git
+   git clone https://github.com/SiestaCat/python-files-restapi.git
    cd python-files-api
    ```
 
