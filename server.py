@@ -5,7 +5,7 @@ import mimetypes
 from typing import List
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Depends
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 # Attempt to load environment variables from a .env file if present
@@ -65,6 +65,11 @@ async def upload_files(
             shutil.copyfileobj(file.file, f)
         saved_files.append(file.filename)
     return {"folder": os.path.basename(unique_folder), "files": saved_files}
+
+# Stats endpoint: returns the "stats.html" file as an HTML response
+@app.get("/stats", response_class=HTMLResponse)
+async def get_stats():
+    return FileResponse("stats.html", media_type="text/html")
 
 if __name__ == "__main__":
     import uvicorn

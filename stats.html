@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Python Files Rest API</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      padding: 20px;
+    }
+    .result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Cabecera centrada -->
+    <div class="row justify-content-center mb-4">
+      <div class="col text-center">
+        <h1>Python Files Rest API</h1>
+      </div>
+    </div>
+
+    <!-- Fila con los campos y botón -->
+    <div class="row align-items-center">
+      <!-- Campo select para protocolo -->
+      <div class="col-md-2">
+        <select id="protocol" class="form-control">
+          <option value="http">http</option>
+          <option value="https">https</option>
+        </select>
+      </div>
+      <!-- Campo de texto para hostname -->
+      <div class="col-md-3">
+        <input type="text" id="hostname" class="form-control" placeholder="Hostname" value="localhost">
+      </div>
+      <!-- Campo de texto para puerto -->
+      <div class="col-md-2">
+        <input type="text" id="port" class="form-control" placeholder="Puerto" value="8080">
+      </div>
+      <!-- Campo de contraseña para API key -->
+      <div class="col-md-3">
+        <input type="password" id="apikey" class="form-control" placeholder="API Key">
+      </div>
+      <!-- Botón "Watch stats" -->
+      <div class="col-md-2">
+        <button id="watchStats" class="btn btn-primary btn-block">Watch stats</button>
+      </div>
+    </div>
+
+    <!-- Resultados mostrados en grande -->
+    <div class="row result text-center">
+      <div class="col">
+        <h2 id="folders" style="color:blue;">Folders: -</h2>
+        <h2 id="files" style="color:green;">Files: -</h2>
+        <h2 id="size" style="color:red;">Total size: -</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap y dependencias JavaScript -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById("watchStats").addEventListener("click", function(){
+      // Recupera los valores de los campos
+      var protocol = document.getElementById("protocol").value;
+      var hostname = document.getElementById("hostname").value;
+      var port = document.getElementById("port").value;
+      var apikey = document.getElementById("apikey").value; // actualmente no se utiliza en la petición
+      
+      // Construye la URL a la que se llamará (sufijo /stats)
+      var url = protocol + "://" + hostname + ":" + port + "/stats";
+
+      // Llamada a la API con fetch
+      fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        // Actualiza los elementos h2 con los datos obtenidos
+        document.getElementById("folders").textContent = "Folders: " + data.folders;
+        document.getElementById("files").textContent = "Files: " + data.files;
+        document.getElementById("size").textContent = "Total size: " + data.size;
+      })
+      .catch(error => {
+        console.error("Error fetching data:", error);
+      });
+    });
+  </script>
+</body>
+</html>
