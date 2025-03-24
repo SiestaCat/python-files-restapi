@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Python Files Rest API</title>
+  <title>Python Files Rest API - Stats</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -20,84 +20,20 @@
     <!-- Centered header -->
     <div class="row justify-content-center mb-4">
       <div class="col text-center">
-        <h1>Python Files Rest API</h1>
+        <h1>Python Files Rest API Stats</h1>
       </div>
     </div>
-
-    <!-- Row with fields and button -->
-    <div class="row align-items-center">
-      <!-- Select field for protocol -->
-      <div class="col-md-2">
-        <select id="protocol" class="form-control">
-          <option value="http">http</option>
-          <option value="https">https</option>
-        </select>
-      </div>
-      <!-- Text field for hostname -->
-      <div class="col-md-3">
-        <input type="text" id="hostname" class="form-control" placeholder="Hostname" value="localhost">
-      </div>
-      <!-- Text field for port -->
-      <div class="col-md-2">
-        <input type="text" id="port" class="form-control" placeholder="Port" value="{{ port }}">
-      </div>
-      <!-- Password field for API key -->
-      <div class="col-md-3">
-        <input type="password" id="apikey" class="form-control" placeholder="API Key">
-      </div>
-      <!-- Button "Watch stats" -->
-      <div class="col-md-2">
-        <button id="watchStats" class="btn btn-primary btn-block">Watch stats</button>
-      </div>
-    </div>
-
-    <!-- Displayed results -->
+    <!-- Displayed stats -->
     <div class="row result text-center">
       <div class="col">
-        <h2 id="folders" style="color:blue;">Folders: -</h2>
-        <h2 id="files" style="color:green;">Files: -</h2>
-        <h2 id="size" style="color:red;">Total size: -</h2>
+        <h2 style="color:blue;">Folders: {{ folders }}</h2>
+        <h2 style="color:green;">Files: {{ files }}</h2>
+        <h2 style="color:red;">Total size: {{ size }}</h2>
       </div>
     </div>
   </div>
-
-  <!-- Bootstrap and JS dependencies -->
+  <!-- Bootstrap JS dependencies -->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    document.getElementById("watchStats").addEventListener("click", function(){
-      // Retrieve the values of the fields
-      var protocol = document.getElementById("protocol").value;
-      var hostname = document.getElementById("hostname").value;
-      var port = document.getElementById("port").value;
-      var apikey = document.getElementById("apikey").value;
-      
-      // Construct the URL to be called (suffix /getstats)
-      var url = protocol + "://" + hostname + ":" + port + "/getstats";
-
-      // Call the API using fetch, sending the header X-API-Key
-      fetch(url, {
-        method: "GET",
-        headers: {
-          "X-API-Key": apikey
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if(data.hasOwnProperty('detail'))
-        {
-          alert(data.detail);
-          return;
-        }
-        // Update the h2 elements with the received data
-        document.getElementById("folders").textContent = "Folders: " + data.folders;
-        document.getElementById("files").textContent = "Files: " + data.files;
-        document.getElementById("size").textContent = "Total size: " + data.size;
-      })
-      .catch(error => {
-        alert("Error fetching data:" + error.toString());
-      });
-    });
-  </script>
 </body>
 </html>

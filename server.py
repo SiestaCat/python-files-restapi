@@ -64,13 +64,9 @@ async def upload_files(
         saved_files.append(file.filename)
     return {"folder": os.path.basename(unique_folder), "files": saved_files}
 
-# Template endpoint: returns the stats page with default port passed in
+# Template endpoint merged with getstats functionality:
 @app.get("/stats", response_class=HTMLResponse)
 async def stats_page(request: Request):
-    return templates.TemplateResponse("stats.html", {"request": request, "port": 8080})
-
-@app.get("/getstats")
-async def get_file_stats(api_key: None = Depends(verify_api_key)):
     total_folders = 0
     total_files = 0
     total_size = 0
@@ -83,10 +79,27 @@ async def get_file_stats(api_key: None = Depends(verify_api_key)):
             if os.path.isfile(file_path):
                 total_size += os.path.getsize(file_path)
 
-    total_size_gb = total_size / (1024**3)
-    size_str = f"{total_size_gb:.2f}".replace('.', ',') + " GB"
+    def format_size(size_bytes):
+        # Returns size formatted in B, KB, MB, GB, TB, or PT
+        if size_bytes == 0:
+            return "0 B"
+        units = ["B", "KB", "MB", "GB", "TB", "PT"]
+        size = float(size_bytes)
+        for unit in units:
+            if size < 1024:
+                # Optionally replace dot with a comma if desired: str(f"{size:.2f}").replace('.', ',')
+                return f"{size:.2f} {unit}"
+            size /= 1024
+        return f"{size:.2f} PT"
+
+    size_str = format_size(total_size)
     
-    return {"folders": total_folders, "files": total_files, "size": size_str}
+    return templates.TemplateResponse("stats.html", {
+        "request": request,
+        "folders": total_folders,
+        "files": total_files,
+        "size": size_str
+    })
 
 if __name__ == "__main__":
     import uvicorn
