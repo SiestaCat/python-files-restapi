@@ -96,10 +96,12 @@ curl -X GET http://localhost:8080/download/generated_upload_folder/example.txt \
 
 ### Curl Examples in PowerShell (Windows)
 
+When using PowerShell, it's recommended to call `curl.exe` to avoid conflicts with the alias for Invoke-WebRequest.
+
 #### Upload Files
 
 ```powershell
-curl -X POST http://localhost:8080/upload `
+curl.exe -X POST http://localhost:8080/upload `
   -H "X-API-Key: your_api_key_here" `
   -F "files=@C:\path\to\example.txt" `
   -F "files=@C:\path\to\image.png"
@@ -108,7 +110,7 @@ curl -X POST http://localhost:8080/upload `
 #### Download File
 
 ```powershell
-curl -X GET http://localhost:8080/download/generated_upload_folder/example.txt `
+curl.exe -X GET http://localhost:8080/download/generated_upload_folder/example.txt `
   -H "X-API-Key: your_api_key_here" `
   --output example.txt
 ```
