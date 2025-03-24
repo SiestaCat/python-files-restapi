@@ -40,7 +40,7 @@ A simple FastAPI service for uploading and downloading files with API key protec
    Create a `.env` file in the project root with the following content:
 
    ```properties
-   API_KEY=your_api_key_here
+   API_KEY=changeme
    HTTP_SERVER_PORT=8080
    ```
 
@@ -58,7 +58,7 @@ Your API will be available at: `http://localhost:8080`
 
 - **Endpoint:** `/upload`
 - **Method:** `POST`
-- **Headers:** `X-API-Key: your_api_key_here`
+- **Headers:** `X-API-Key: changeme`
 - **Form Data:** Upload files using the key `files`
 - **Response Example:**
   ```json
@@ -72,7 +72,7 @@ Your API will be available at: `http://localhost:8080`
 
 - **Endpoint:** `/download/{file_path}`
 - **Method:** `GET`
-- **Headers:** `X-API-Key: your_api_key_here`
+- **Headers:** `X-API-Key: changeme`
 - **Response:** Returns the requested file if it exists. Otherwise, responds with a 404 error.
 
 ## Curl Examples
@@ -81,7 +81,7 @@ Your API will be available at: `http://localhost:8080`
 
 ```bash
 curl -X POST http://localhost:8080/upload \
-  -H "X-API-Key: your_api_key_here" \
+  -H "X-API-Key: changeme" \
   -F "files=@/path/to/example.txt" \
   -F "files=@/path/to/image.png"
 ```
@@ -90,7 +90,7 @@ curl -X POST http://localhost:8080/upload \
 
 ```bash
 curl -X GET http://localhost:8080/download/generated_upload_folder/example.txt \
-  -H "X-API-Key: your_api_key_here" \
+  -H "X-API-Key: changeme" \
   --output example.txt
 ```
 
@@ -102,7 +102,7 @@ When using PowerShell, it's recommended to call `curl.exe` to avoid conflicts wi
 
 ```powershell
 curl.exe -X POST http://localhost:8080/upload `
-  -H "X-API-Key: your_api_key_here" `
+  -H "X-API-Key: changeme" `
   -F "files=@C:\path\to\example.txt" `
   -F "files=@C:\path\to\image.png"
 ```
@@ -111,7 +111,7 @@ curl.exe -X POST http://localhost:8080/upload `
 
 ```powershell
 curl.exe -X GET http://localhost:8080/download/generated_upload_folder/example.txt `
-  -H "X-API-Key: your_api_key_here" `
+  -H "X-API-Key: changeme" `
   --output example.txt
 ```
 
@@ -140,6 +140,14 @@ docker run --rm -it -p 8080:8080 --env API_KEY=changeme python-files-api
 ```
 
 *Remember to update the API key and port as needed.*
+
+### Run the Docker Container with Persistent Storage
+
+To ensure that uploaded files persist between container runs, mount the local "files" folder as a Docker volume:
+
+```bash
+docker run --rm -it -p 8080:8080 -v .\files:/files --env API_KEY=changeme python-files-api
+```
 
 ## Additional Information
 
