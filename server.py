@@ -2,6 +2,7 @@ import os
 import uuid
 import shutil
 import mimetypes
+import logging     # added import for logging
 from typing import List
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Depends
@@ -16,10 +17,14 @@ try:
 except ImportError:
     pass
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 # Retrieve the API key from environment variables
 API_KEY = os.getenv("API_KEY", "default_api_key")
 
-# Define the base directory to store files
+# Define base directory to store files
 FILES_DIR = "files"
 
 app = FastAPI()
@@ -29,22 +34,27 @@ templates = Jinja2Templates(directory="templates")
 # Create the "files" directory if it doesn't exist
 if not os.path.exists(FILES_DIR):
     os.makedirs(FILES_DIR)
+    logger.info(f"Created files directory at {FILES_DIR}")
 
 # Dependency to verify API key via request headers (expects header "X-API-Key")
 async def verify_api_key(request: Request):
     header_api_key = request.headers.get("X-API-Key")
     if header_api_key != API_KEY:
+        logger.warning("Unauthorized access attempt with invalid API key")
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Invalid API Key")
-
+    logger.info("API key verification successful")
+    
 # Download endpoint: stream file download from the "files" directory
 @app.get("/download/{file_path:path}")
 async def download_file(file_path: str, request: Request, api_key: None = Depends(verify_api_key)):
     full_path = os.path.join(FILES_DIR, file_path)
     if not os.path.isfile(full_path):
+        logger.error(f"File not found: {full_path}")
         raise HTTPException(status_code=404, detail="File not found")
     mime_type, _ = mimetypes.guess_type(full_path)
     if mime_type is None:
         mime_type = "application/octet-stream"
+    logger.info(f"Downloading file: {full_path}")
     return FileResponse(full_path, media_type=mime_type, filename=os.path.basename(full_path))
 
 # Upload endpoint: allow single or multiple file uploads
@@ -56,12 +66,14 @@ async def upload_files(
 ):
     unique_folder = os.path.join(FILES_DIR, str(uuid.uuid4()))
     os.makedirs(unique_folder, exist_ok=True)
+    logger.info(f"Created unique upload folder: {unique_folder}")
     saved_files = []
     for file in files:
         file_path = os.path.join(unique_folder, file.filename)
         with open(file_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
         saved_files.append(file.filename)
+        logger.info(f"Uploaded file: {file.filename} to {unique_folder}")
     return {"folder": os.path.basename(unique_folder), "files": saved_files}
 
 # Template endpoint merged with getstats functionality:
@@ -87,13 +99,12 @@ async def stats_page(request: Request):
         size = float(size_bytes)
         for unit in units:
             if size < 1024:
-                # Optionally replace dot with a comma if desired: str(f"{size:.2f}").replace('.', ',')
                 return f"{size:.2f} {unit}"
             size /= 1024
         return f"{size:.2f} PT"
 
     size_str = format_size(total_size)
-    
+    logger.info(f"Stats calculated: {total_folders} folders, {total_files} files, total size {size_str}")
     return templates.TemplateResponse("stats.html", {
         "request": request,
         "folders": total_folders,
@@ -103,4 +114,5 @@ async def stats_page(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
+    logger.info("Starting server...")
     uvicorn.run(app, host="0.0.0.0", port=8080)
