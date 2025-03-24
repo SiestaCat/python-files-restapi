@@ -11,8 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code.
 COPY . .
 
-# Expose the port defined in your application (default is 8000).
-EXPOSE 8000
+# Expose the port defined in your application (default is 8080).
+EXPOSE 8080
 
 # Run the application with uvicorn.
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]

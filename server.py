@@ -16,9 +16,8 @@ try:
 except ImportError:
     pass
 
-# Retrieve the API key and port from environment variables
+# Retrieve the API key from environment variables
 API_KEY = os.getenv("API_KEY", "default_api_key")
-PORT = int(os.getenv("HTTP_SERVER_PORT", "8080"))
 
 # Define the base directory to store files
 FILES_DIR = "files"
@@ -68,7 +67,7 @@ async def upload_files(
 # Template endpoint: returns the stats page with default port passed in
 @app.get("/stats", response_class=HTMLResponse)
 async def stats_page(request: Request):
-    return templates.TemplateResponse("stats.html", {"request": request, "port": PORT})
+    return templates.TemplateResponse("stats.html", {"request": request, "port": 8080})
 
 @app.get("/getstats")
 async def get_file_stats(api_key: None = Depends(verify_api_key)):
@@ -91,4 +90,4 @@ async def get_file_stats(api_key: None = Depends(verify_api_key)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
