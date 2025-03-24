@@ -50,7 +50,7 @@ Start the server with:
 ```bash
 python server.py
 ```
-Your API will be available at: `http://0.0.0.0:8080`
+Your API will be available at: `http://localhost:8080`
 
 ## API Endpoints
 
@@ -74,6 +74,27 @@ Your API will be available at: `http://0.0.0.0:8080`
 - **Method:** `GET`
 - **Headers:** `X-API-Key: your_api_key_here`
 - **Response:** Returns the requested file if it exists. Otherwise, responds with a 404 error.
+
+## Curl Examples
+
+### Upload Files
+
+```bash
+curl -X POST http://localhost:8080/upload \
+  -H "X-API-Key: your_api_key_here" \
+  -F "files=@/path/to/example.txt" \
+  -F "files=@/path/to/image.png"
+```
+
+### Download File
+
+```bash
+curl -X GET http://localhost:8080/download/generated_upload_folder/example.txt \
+  -H "X-API-Key: your_api_key_here" \
+  --output example.txt
+```
+
+*Replace `generated_upload_folder` with the actual folder name returned from the upload endpoint, and update `/path/to/your/file` accordingly.*
 
 ## Docker Usage
 
